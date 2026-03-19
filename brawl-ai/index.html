@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Brawl AI</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- 🌍 언어 선택 -->
+<div id="languageScreen">
+  <h1>🌍 Language</h1>
+  <button onclick="setLang('ko')">한국어</button>
+  <button onclick="setLang('en')">English</button>
+</div>
+
+<!-- 🎮 메인 -->
+<div id="mainUI" class="hidden">
+
+  <h1 id="title"></h1>
+
+  <div class="top">
+
+    <!-- 우리팀 -->
+    <div class="side">
+      <h3 id="teamText"></h3>
+      <div id="teamBox" class="pickBox"></div>
+    </div>
+
+    <!-- 🎯 중앙 -->
+    <div class="centerBox">
+
+      <!-- 🔥 강조 UI -->
+      <div class="modeMapBox">
+        <label id="modeText"></label>
+        <select id="mode" onchange="updateMaps()"></select>
+
+        <label id="mapText"></label>
+        <select id="map"></select>
+      </div>
+
+      <!-- 🔥 버튼 위치 -->
+      <button id="btn" onclick="recommend()"></button>
+
+      <div id="result"></div>
+
+    </div>
+
+    <!-- 상대팀 -->
+    <div class="side">
+      <h3 id="enemyText"></h3>
+      <div id="enemyBox" class="pickBox"></div>
+    </div>
+
+  </div>
+
+  <!-- 🎴 브롤러 -->
+  <div id="brawlerGrid"></div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

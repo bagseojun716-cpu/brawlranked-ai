@@ -1,0 +1,153 @@
+/* 🌌 전체 */
+body{
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background: radial-gradient(circle at top, #0f172a, #020617);
+  color:white;
+  text-align:center;
+}
+
+/* 🔥 타이틀 */
+h1{
+  font-size:40px;
+  margin:20px;
+  text-shadow:0 0 20px #38bdf8;
+}
+
+/* 🧱 상단 */
+.top{
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  margin:20px;
+  gap:20px;
+  flex-wrap:wrap;
+}
+
+/* 📦 픽 박스 */
+.pickBox{
+  width:280px;
+  min-height:110px;
+  border-radius:15px;
+  border:2px dashed #334155;
+  padding:10px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(10px);
+  transition:0.3s;
+}
+
+.pickBox.dragover{
+  background:rgba(56,189,248,0.2);
+  transform:scale(1.05);
+}
+
+/* 🎴 브롤러 그리드 (핵심🔥) */
+#brawlerGrid{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap:14px;
+  padding:20px;
+}
+
+/* 🎴 카드 */
+.card{
+  width:100%;
+  background:#020617;
+  border-radius:14px;
+  padding:6px;
+  cursor:grab;
+  transition:0.25s;
+  text-align:center;
+}
+
+.card:hover{
+  transform:scale(1.12);
+  box-shadow:0 0 18px #38bdf8;
+}
+
+.card img{
+  width:100%;
+  border-radius:10px;
+}
+
+.card div{
+  font-size:12px;
+  margin-top:4px;
+}
+
+/* 🧩 픽된 카드 */
+.pick{
+  width:65px;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.pick img{
+  width:100%;
+  border-radius:10px;
+}
+
+.pick:hover{
+  transform:scale(1.2);
+}
+
+/* 🎯 중앙 */
+.centerBox{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+/* 🎚️ select */
+select{
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  background:#0f172a;
+  color:white;
+  font-size:14px;
+}
+
+/* 🔥 버튼 */
+button{
+  margin-top:20px;
+  padding:12px 25px;
+  font-size:18px;
+  border:none;
+  border-radius:15px;
+  background:linear-gradient(45deg,#38bdf8,#6366f1);
+  color:white;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+button:hover{
+  transform:scale(1.1);
+  box-shadow:0 0 20px #38bdf8;
+}
+
+/* 💥 결과 */
+#result{
+  margin-top:20px;
+  font-size:22px;
+  color:#facc15;
+  text-shadow:0 0 10px #facc15;
+}
+
+/* 📱 반응형 (모바일) */
+@media (max-width: 600px){
+  #brawlerGrid{
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+  }
+
+  .card div{
+    font-size:10px;
+  }
+
+  .pick{
+    width:55px;
+  }
+}
