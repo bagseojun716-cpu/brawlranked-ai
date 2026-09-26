@@ -151,3 +151,30 @@ button:hover{
     width:55px;
   }
 }
+
+/* 🙈 숨김 */
+.hidden{
+  display:none;
+}
+
+/* 🖼️ 이미지 없을 때 */
+.noimg{
+  aspect-ratio:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:10px;
+  background:#1e293b;
+  font-size:20px !important;
+  font-weight:bold;
+}
+
+/* 🌍 언어 버튼 */
+#langBtn{
+  position:absolute;
+  top:10px;
+  right:10px;
+  margin:0;
+  padding:8px 12px;
+  font-size:16px;
+}
