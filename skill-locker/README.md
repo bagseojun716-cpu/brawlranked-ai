@@ -2,7 +2,8 @@
 
 축구 개인기를 단계별로 정리해 올리고, 좋아요·조회수로 크리에이터 포인트를 쌓고, 연습할 기술을 내 락커에 모아 두는 공유 사이트입니다.
 
-실제 사이트: https://claude.ai/artifact/VoSPHXCaaVwAfh5MBJycf3
+- 전체 기능 (올리기·좋아요·담기·프로필): https://claude.ai/artifact/VoSPHXCaaVwAfh5MBJycf3
+- 보기 전용 (GitHub Pages): https://bagseojun716-cpu.github.io/brawlranked-ai/skill-locker/
 
 ## 주요 기능
 
@@ -27,9 +28,12 @@
 이 페이지는 claude.ai 아티팩트로 동작하도록 만들어졌습니다. 기술 목록, 좋아요, 조회수, 프로필, 썸네일은
 아티팩트의 공유 저장소(`window.claude.use("db")`)에 저장되고, 로그인한 사용자 정보는 `window.claude.use("user")`로 가져옵니다.
 
-그래서 `index.html`을 브라우저로 바로 열면 화면 틀은 보이지만 "저장소에 연결할 수 없어요"라는 안내가 나오고 기술 목록은 비어 있습니다.
-다른 곳에서 독립 사이트로 운영하려면 이 두 부분을 Firebase 같은 백엔드로 바꿔야 합니다.
-`data/skills.json`과 `images/`는 그때 초기 데이터로 쓸 수 있습니다.
+claude.ai 밖(GitHub Pages 등)에서 열면 저장소가 없으므로, 같은 폴더의 `data/skills.json`과 `images/`를 읽어
+**보기 전용 모드**로 동작합니다. 기술 목록·상세·발 동작 그림·검색·정렬은 되고, 올리기·좋아요·담기·프로필은 꺼집니다.
+
+- 로컬에서 볼 때는 파일을 더블클릭하지 말고 `python3 -m http.server`처럼 간단한 서버로 여세요 (`file://`에서는 데이터 파일을 못 읽습니다).
+- 이 저장소의 `index.html`은 완전한 HTML 문서이고, claude.ai 아티팩트에 게시하는 버전은 `<!doctype>`/`<head>` 없이 본문만 씁니다 (아티팩트가 감싸 줌).
+- 모든 기능을 독립 사이트로 운영하려면 저장소 부분을 Firebase 같은 백엔드로 바꿔야 합니다.
 
 저장소 구조:
 
