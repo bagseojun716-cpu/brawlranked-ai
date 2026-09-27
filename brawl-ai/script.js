@@ -27,37 +27,17 @@ let team = [];
 let enemy = [];
 let tierData = [];
 
-// ===== 💾 저장소 (사생활 모드 등에서 실패해도 동작) =====
-function getLang(){
-  try{ return localStorage.getItem("lang") || "ko"; }catch(e){ return currentLang; }
-}
-let currentLang = "ko";
-
 // ===== 🌍 언어 설정 =====
 function setLang(lang){
-  currentLang = lang;
-  try{ localStorage.setItem("lang",lang); }catch(e){}
+  localStorage.setItem("lang",lang);
   languageScreen.style.display="none";
   mainUI.classList.remove("hidden");
   load();
 }
 
-// 🌍 언어 다시 선택
-function changeLang(){
-  mainUI.classList.add("hidden");
-  languageScreen.style.display="";
-}
-
-// 저장된 언어가 있으면 언어 선택 화면 건너뛰기
-window.addEventListener("DOMContentLoaded",()=>{
-  let saved=null;
-  try{ saved=localStorage.getItem("lang"); }catch(e){}
-  if(saved) setLang(saved);
-});
-
 // ===== 🚀 초기 로드 =====
 function load(){
-  const lang = getLang();
+  const lang = localStorage.getItem("lang") || "ko";
   const t = text[lang];
 
   title.innerText = t.title;
@@ -68,7 +48,7 @@ function load(){
   mapText.innerText = t.map;
 
   setupMode(lang);
-  if(!brawlers.length) loadBrawlers(); else createGrid();
+  loadBrawlers();
   setupDrop();
   loadTier(); // 🔥 AI 데이터
 }
@@ -78,9 +58,9 @@ function setupMode(lang){
   const mode = document.getElementById("mode");
   mode.innerHTML="";
 
-  Object.keys(maps[lang]).forEach((m,i)=>{
+  Object.keys(maps[lang]).forEach(m=>{
     const o=document.createElement("option");
-    o.value=i;
+    o.value=m;
     o.textContent=m;
     mode.appendChild(o);
   });
@@ -90,16 +70,14 @@ function setupMode(lang){
 
 // ===== 🗺️ 맵 =====
 function updateMaps(){
-  const lang = getLang();
-  const modeIdx = Number(document.getElementById("mode").value);
+  const lang = localStorage.getItem("lang") || "ko";
+  const mode = document.getElementById("mode").value;
   const map = document.getElementById("map");
 
   map.innerHTML="";
 
-  const koMaps = Object.values(maps.ko)[modeIdx];
-  Object.values(maps[lang])[modeIdx].forEach((m,i)=>{
+  maps[lang][mode].forEach(m=>{
     const o=document.createElement("option");
-    o.value=koMaps[i]; // 추천 데이터는 한국어 맵 이름 기준
     o.textContent=m;
     map.appendChild(o);
   });
@@ -107,40 +85,14 @@ function updateMaps(){
 
 // ===== 🔥 브롤러 로드 =====
 async function loadBrawlers(){
-  const grid = document.getElementById("brawlerGrid");
-  grid.innerText = "⏳ Loading...";
-  try{
-    const res = await fetch("https://api.brawlify.com/v1/brawlers");
-    if(!res.ok) throw new Error(res.status);
-    const data = await res.json();
+  const res = await fetch("https://api.brawlify.com/v1/brawlers");
+  const data = await res.json();
 
-    brawlers = data.list
-      .filter(b=>b.name!=="Buzz Lightyear")
-      .sort((a,b)=>a.rarity.id-b.rarity.id);
-  }catch(e){
-    // API 실패 시 내장 목록으로 동작 (이미지는 이름 글자로 대체)
-    console.log("❌ 브롤러 API 실패, 내장 목록 사용", e);
-    brawlers = FALLBACK_BRAWLERS.map((name,i)=>({id:"f"+i, name, imageUrl2:""}));
-  }
+  brawlers = data.list
+    .filter(b=>b.name!=="Buzz Lightyear")
+    .sort((a,b)=>a.rarity.id-b.rarity.id);
 
   createGrid();
-}
-
-const FALLBACK_BRAWLERS = [
-  "Shelly","Colt","Bull","Brock","Rico","Spike","Barley","Jessie","Nita","Dynamike",
-  "El Primo","Mortis","Crow","Poco","Bo","Piper","Pam","Tara","Darryl","Penny",
-  "Frank","Gene","Tick","Leon","Rosa","Carl","Bibi","8-Bit","Sandy","Bea",
-  "Emz","Mr. P","Max","Jacky","Gale","Nani","Sprout","Surge","Colette","Amber",
-  "Lou","Byron","Edgar","Ruffs","Stu","Belle","Squeak","Grom","Buzz","Griff",
-  "Ash","Meg","Lola","Fang","Eve","Janet","Bonnie","Otis","Sam","Gus",
-  "Buster","Chester","Gray","Mandy","R-T","Willow","Maisie","Hank","Cordelius","Doug",
-  "Pearl","Chuck","Charlie","Mico","Kit","Larry & Lawrie","Melodie","Angelo","Draco","Lily"
-];
-
-// 이미지 없으면 이름 첫 글자 표시
-function brawlerImg(b){
-  if(b.imageUrl2) return `<img src="${b.imageUrl2}" alt="${b.name}">`;
-  return `<div class="noimg">${b.name.slice(0,2)}</div>`;
 }
 
 // ===== 🎴 카드 생성 =====
@@ -154,18 +106,12 @@ function createGrid(){
     div.draggable=true;
 
     div.innerHTML=`
-      ${brawlerImg(b)}
+      <img src="${b.imageUrl2}">
       <div>${b.name}</div>
     `;
 
     div.ondragstart=(e)=>{
       e.dataTransfer.setData("id", b.id);
-    };
-
-    // 📱 모바일: 탭하면 우리팀 → 꽉 차면 상대팀에 추가
-    div.onclick=()=>{
-      if(team.length<3) addPick("team", b.id);
-      else addPick("enemy", b.id);
     };
 
     grid.appendChild(div);
@@ -188,23 +134,19 @@ function setupDrop(){
       box.classList.remove("dragover");
 
       const id=e.dataTransfer.getData("id");
-      addPick(box===teamBox ? "team" : "enemy", id);
+      const b=brawlers.find(x=>x.id==id);
+
+      if(box===teamBox){
+        if(team.length>=3) return alert("3명까지!");
+        if(!team.find(x=>x.id==id)) team.push(b);
+      }else{
+        if(enemy.length>=3) return alert("3명까지!");
+        if(!enemy.find(x=>x.id==id)) enemy.push(b);
+      }
+
+      render();
     };
-
-    box.ondragleave=()=>box.classList.remove("dragover");
   });
-}
-
-// ===== ➕ 픽 추가 =====
-function addPick(side, id){
-  const b=brawlers.find(x=>x.id==id);
-  if(!b) return;
-  if(team.find(x=>x.id==id) || enemy.find(x=>x.id==id)) return;
-
-  const list = side==="team" ? team : enemy;
-  if(list.length>=3) return alert(getLang()==="ko" ? "3명까지!" : "Max 3!");
-  list.push(b);
-  render();
 }
 
 // ===== 🖼️ 렌더 =====
@@ -215,7 +157,7 @@ function render(){
   team.forEach((b,i)=>{
     const div=document.createElement("div");
     div.className="pick team";
-    div.innerHTML=brawlerImg(b);
+    div.innerHTML=`<img src="${b.imageUrl2}">`;
 
     div.onclick=()=>{
       team.splice(i,1);
@@ -228,7 +170,7 @@ function render(){
   enemy.forEach((b,i)=>{
     const div=document.createElement("div");
     div.className="pick enemy";
-    div.innerHTML=brawlerImg(b);
+    div.innerHTML=`<img src="${b.imageUrl2}">`;
 
     div.onclick=()=>{
       enemy.splice(i,1);
@@ -241,7 +183,6 @@ function render(){
 
 // ===== 🔥 티어 가져오기 =====
 async function loadTier(){
-  if(!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return;
   try{
     const res = await fetch("http://localhost:3000/tier");
     tierData = await res.json();
@@ -354,6 +295,5 @@ function recommend(){
 
   const picks = scores.slice(0,5);
 
-  const label = getLang()==="ko" ? "🔥 추천: " : "🔥 Picks: ";
-  result.innerText = label + picks.map(p=>p.name).join(", ");
+  result.innerText = "🔥 추천: " + picks.map(p=>p.name).join(", ");
 }
