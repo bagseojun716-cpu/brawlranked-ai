@@ -1,3 +1,9 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="축구 개인기를 단계별로 정리하고 공유하는 개인기 락커룸">
 <title>개인기 락커룸</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -338,6 +344,7 @@ h1{margin:4px 0 0;font-size:clamp(26px,4.4vw,34px);line-height:1.2;font-weight:7
 /* overlay panels */
 .overlay{position:fixed;inset:0;background:rgba(10,16,12,.5);display:flex;justify-content:flex-end;z-index:10}
 .panel{background:var(--bg);width:min(560px,100%);height:100%;overflow-y:auto;padding:24px 20px calc(32px + env(safe-area-inset-bottom,0px));padding-top:calc(24px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:16px;box-shadow:-8px 0 30px rgba(0,0,0,.2)}
+.panel>*{flex-shrink:0}
 .panel-head{display:flex;justify-content:space-between;align-items:start;gap:12px}
 .panel h2{margin:0;font-size:26px;line-height:1.2;text-wrap:balance}
 .close{border:0;background:var(--surface-2);width:36px;height:36px;border-radius:50%;font-size:20px;line-height:1;flex:none}
@@ -390,7 +397,8 @@ form{display:flex;flex-direction:column;gap:14px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
-
+</head>
+<body>
 <header class="appbar">
   <div class="appbar-in">
     <button class="menu-btn" id="menuBtn" type="button" aria-label="메뉴 열기: 프로필과 앱 소개" aria-haspopup="dialog">
@@ -916,7 +924,7 @@ form{display:flex;flex-direction:column;gap:14px}
     const grid = $("grid"); grid.innerHTML = "";
     document.querySelector(".controls").hidden = S.tab === "creators";
     $("chips").hidden = S.tab === "creators";
-    if (!S.db) {
+    if (!S.db && !S.static) {
       grid.append(el("div", { class: "empty", text: S.dbFailed ? "지금은 락커룸 저장소에 연결할 수 없어요. claude.ai에서 이 페이지를 열어 주세요." : "락커룸 여는 중…" }));
       return;
     }
@@ -977,8 +985,8 @@ form{display:flex;flex-direction:column;gap:14px}
     const [eb, title, desc] = PAGE[S.tab];
     $("pgEyebrow").textContent = eb; $("pgTitle").textContent = title; $("pgDesc").textContent = desc;
     const k = $("kpis"); k.replaceChildren();
-    k.hidden = S.tab !== "all" || !S.db;
-    $("resultLine").hidden = S.tab === "creators" || !S.db;
+    k.hidden = S.tab !== "all" || (!S.db && !S.static);
+    $("resultLine").hidden = S.tab === "creators" || (!S.db && !S.static);
     if (k.hidden) return;
     const cm = creators();
     let likes = 0, views = 0;
@@ -1509,6 +1517,7 @@ form{display:flex;flex-direction:column;gap:14px}
   $("persona").addEventListener("change", (e) => { S.persona = e.target.value; render(); });
 
   $("openNew").addEventListener("click", () => {
+    if (S.static) { toast("보기 전용 버전이에요. 기술 올리기는 claude.ai 버전에서 할 수 있어요."); return; }
     if (!S.db) { toast("락커룸이 아직 열리지 않았어요"); return; }
     if (S.readOnly || !S.me) { toast("이 페이지에서 글을 쓸 권한이 없어요."); return; }
     if (!caseRows.length) resetForm(); else { renderSimPick(); checkForm(); }
@@ -1561,7 +1570,22 @@ form{display:flex;flex-direction:column;gap:14px}
   (async () => {
     const [db, user] = await Promise.all([window.claude?.use("db"), window.claude?.use("user")]);
     S.user = user || null;
-    if (!db) { S.dbFailed = true; render(); return; }
+    if (!db) {
+      // claude.ai 밖(예: GitHub Pages)에서는 함께 배포된 기본 데이터로 보기 전용 모드
+      try {
+        const res = await fetch("data/skills.json", { cache: "no-cache" });
+        if (!res.ok) throw new Error(res.status);
+        const list = await res.json();
+        S.static = true; S.readOnly = true;
+        S.skills = list.map((v) => ({ ...v, difficulty: Math.min(5, Math.max(1, Number(v.difficulty) || 1)), name: String(v.name || "이름 없는 기술"), category: CATS.includes(v.category) ? v.category : "프리스타일" }));
+        S.thumbs = Object.fromEntries(S.skills.map((v) => [v.id, "images/" + encodeURIComponent(v.id) + ".jpg"]));
+        const n = $("notice"); n.hidden = false; n.replaceChildren(
+          "보기 전용 버전이에요. 기술 올리기, 좋아요, 락커 담기, 프로필은 ",
+          el("a", { href: "https://claude.ai/artifact/VoSPHXCaaVwAfh5MBJycf3", target: "_blank", rel: "noopener noreferrer", text: "claude.ai 버전" }),
+          "에서 쓸 수 있어요.");
+      } catch (e) { S.dbFailed = true; }
+      render(); return;
+    }
     S.db = db;
     if (user) {
       const [me, owner, can] = await Promise.all([user.id(), user.isOwner(), user.can("data.write")]);
@@ -1605,3 +1629,5 @@ form{display:flex;flex-direction:column;gap:14px}
   })();
 })();
 </script>
+</body>
+</html>
