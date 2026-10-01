@@ -45,3 +45,22 @@ claude.ai 밖(GitHub Pages 등)에서 열면 저장소가 없으므로, 같은 �
 | `views` | 사용자 id | 그 사람이 열어 본 기술 목록 (본인만 쓰기) |
 | `profiles` | 사용자 id | 프로필 (본인만 쓰기) |
 | `data/users/{id}/profile` | — | 내 락커에 담은 기술 (본인만 읽고 쓰기) |
+
+## 검색엔진(구글) 노출
+
+GitHub Pages 버전에는 검색엔진이 읽기 좋은 파일이 함께 있습니다.
+
+| 경로 | 내용 |
+|---|---|
+| `skills/<id>.html` | 기술별 안내 페이지. 자바스크립트 없이 이름·설명·순서·사용 사례·사진이 보이고, HowTo 구조화 데이터가 들어 있음 |
+| `sitemap.xml` | 메인과 기술 페이지 주소 목록 (구글 서치 콘솔에 제출) |
+| `index.html`의 `SEO:HEAD`, `SEO:LINKS` 구간 | 검색 결과 제목·설명, 링크 미리보기(OG), 구조화 데이터, 기술 페이지 링크 |
+
+기술 데이터(`data/skills.json`)를 바꾼 뒤에는 아래 명령으로 다시 만들어 주세요. 몇 번 실행해도 결과는 같습니다.
+
+```
+python3 skill-locker/tools/build_seo.py
+```
+
+구글 서치 콘솔에서 받은 "HTML 태그" 인증 값은 `tools/build_seo.py`의 `GOOGLE_VERIFICATION`에 넣고 다시 실행하면 메인 페이지에 들어갑니다.
+메인 페이지는 `#s-<기술 id>` 주소로 열면 그 기술 상세가 바로 열립니다 (예: `#s-cruyff`).
